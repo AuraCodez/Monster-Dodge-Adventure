@@ -5,6 +5,7 @@ window = pygame.display.set_mode((1200, 720)) #creates a window with the functio
 
 
 ball = pygame.image.load("ball.png")
+robot = pygame.image.load("robot.png")
 
 x = 0
 y = 0
@@ -25,10 +26,11 @@ while True:
 
     window.fill((0,204,204))
     window.blit(pygame.transform.scale(ball,(150, 150)), (x, y)) 
+    window.blit(robot, (0, 200))
     window.blit(pygame.transform.scale(ball,(150, 150)), (0, 0)) 
     window.blit(pygame.transform.scale(ball,(150, 150)), (a,560)) 
     window.blit(pygame.transform.scale(ball,(150, 150)), (0,560)) 
-    window.blit(ball,(600-width/2,360-height/2)) #Puts the ball at the middle of the screen, the centre of the window is at half its width and height
+       #window.blit(ball,(600-width/2,360-height/2)) #Puts the ball at the middle of the screen, the centre of the window is at half its width and height
     pygame.display.flip() # After the window is filled with colour the image is drawn at the given location with the blit method. Then the contents of the window are updated with the function pygame.display.flip.
 
     x+= velocity 
