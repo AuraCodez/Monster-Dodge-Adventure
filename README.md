@@ -1,2 +1,4 @@
 # DodgingThings
- Devloping a game in Pygame 
+ Devloping a game in Pygame -- Still in progress
+ 
+ 
