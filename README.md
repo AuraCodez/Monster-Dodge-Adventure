@@ -9,7 +9,7 @@ Objective : In this game, the player controls a character that is falling contin
 
 Features
 
-- Player character that falls continuously towards the bottom of the screen
+- Player character that can move with arrow keys
 - Obstacle sprites that move horizontally across the screen
 - Collision detection between player and obstacle sprites
 - Player lives counter and game over condition
