@@ -1,5 +1,8 @@
 import pygame
 
+
+pygame.font.init()
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -26,17 +29,21 @@ class Player(pygame.sprite.Sprite):
 
 #The robot can also shoot out soccer balls if they want.
 class SoccerBall(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, direction):
         super().__init__()
         self.image = pygame.image.load("soccerBall.png")
         self.image = pygame.transform.scale(self.image, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.direction = direction
         self.speed = 5   
         
     def update(self):
-        self.rect.y -= 5     
+        if self.direction == "horizontal":
+            self.rect.x += 7
+        if self.direction == "leftHorizontal":
+            self.rect.x -= 5  
 
         
 #The Robot will shoot out basketballs        
@@ -57,14 +64,23 @@ class Ball(pygame.sprite.Sprite):
 
 RES = 800, 600
 fps = 60
-background_image = pygame.image.load("bluemoon.png")
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 BORDER_SIZE = 10
+background_image = pygame.image.load("bluemoon.png")
+
+#Ball Counter
+font = pygame.font.Font(None, 36)
+textBasketBallCount = "Ball Count: "
+text_image_basketBall = font.render(textBasketBallCount, True, (255, 255, 255))
+
+text_width, text_height = text_image_basketBall.get_size()
+text_x = SCREEN_WIDTH - text_width - 35
+text_y = 10
+
+
 
 #To detect if the player goes out of bounds.
-
-
 left_boundary = BORDER_SIZE
 right_boundary = SCREEN_WIDTH - BORDER_SIZE
 top_boundary = BORDER_SIZE
@@ -95,8 +111,12 @@ def main():
                         ball = Ball(robot.rect.x, robot.rect.y - 25) 
                         balls.add(ball)
                 if event.key == pygame.K_1:
-                        soccerBall = SoccerBall(robot.rect.x, robot.rect.y - 25)
+                        soccerBall = SoccerBall(robot.rect.x, robot.rect.y + 35, "horizontal")
                         soccerBalls.add(soccerBall)
+                        
+                if event.key == pygame.K_2:
+                    soccerBall = SoccerBall(robot.rect.x, robot.rect.y + 35, "leftHorizontal")
+                    soccerBalls.add(soccerBall)
                    
                     
                 
@@ -124,6 +144,7 @@ def main():
             robot.rect.y = SCREEN_HEIGHT
             
         screen.blit(background_image, (0, 0))
+        screen.blit(text_image_basketBall, (text_x, text_y))
         balls.update()
         balls.draw(screen)
         
