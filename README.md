@@ -1,6 +1,8 @@
 # DodgingThings
  Devloping a game in Pygame -- Still in progress
  
+ The main file which the game is run is in DodgingThings.py .
+ 
  
 Objective : In this game, the player controls a character that is falling continuously towards the bottom of the screen. The player must avoid flying obstacles by moving the character left or right to dodge them. The player has three lives, and if they collide with an obstacle, they lose one life. The game ends when the player runs out of lives.
 
