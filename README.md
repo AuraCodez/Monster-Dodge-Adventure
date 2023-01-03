@@ -16,10 +16,10 @@ Features
 
 Optional Features
 
-- Power-ups that give the player temporary invincibility or extra lives
-- Scorekeeping system that tracks the player's score and displays it on the screen
-- Multiple levels with increasing difficulty
-- Customizable character appearance and movement controls
+- Power-ups that give the player temporary invincibility or extra lives (In Progress)
+- Scorekeeping system that tracks the player's score and displays it on the screen (In Progress)
+- Multiple levels with increasing difficulty (In Progress)
+- Customizable character appearance and movement controls (In Progress)
 
 Technologies
 
