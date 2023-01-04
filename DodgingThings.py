@@ -1,5 +1,6 @@
 import pygame
-
+import os
+import random
 
 pygame.font.init()
 
@@ -60,23 +61,84 @@ class Ball(pygame.sprite.Sprite):
         
     def update(self):
         self.rect.y -= 5
-
+        
+        
+class PinkMonster(pygame.sprite.Sprite):
+    def __init__(self, x, y, direction, flipped):
+        super().__init__()
+    
+        self.animation_list = []
+        #Loading the animations in
+        self.right_animation_list = []
+        
+        #Loading the original animation
+        for i in range(10):
+            image = pygame.image.load(os.path.join('animation', 'image{}.png'.format(i)))
+            image = pygame.transform.scale(image, (image.get_width() * 1.5, image.get_height() * 1.5))
+            self.animation_list.append(image)
+            
+        #Want to make the monster walk Right, so use pygame.transfom.flip()
+        for image in self.animation_list:
+            flipped_image = pygame.transform.flip(image, True, False)
+            self.right_animation_list.append(flipped_image)
+            
+            
+        self.current_sprite = 0
+        self.current_sprite_forRight = 0
+        self.image = self.animation_list[self.current_sprite]
+        self.flipped_image = self.right_animation_list[self.current_sprite_forRight]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.direction = direction
+        self.flipped = flipped
+        
+    def update(self):
+        self.current_sprite += 1
+        self.current_sprite_forRight += 1
+        
+        if self.flipped == "left":
+            if self.current_sprite >= len(self.animation_list):
+              self.current_sprite = 0
+            self.image = self.animation_list[self.current_sprite]
+            
+        if self.flipped == "right":
+             if self.current_sprite_forRight >= len(self.right_animation_list):
+               self.current_sprite_forRight = 0
+             self.flipped_image = self.right_animation_list[self.current_sprite_forRight]
+        
+        if self.direction == "left":
+            self.rect.x -= 4
+            
+        if self.direction == "right":
+            self.image = self.flipped_image
+            self.rect.x += 4
+            
+        
+            
 
 RES = 800, 600
 fps = 60
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 BORDER_SIZE = 10
+
+#Background image
 background_image = pygame.image.load("bluemoon.png")
 
 #Ball Counter
-font = pygame.font.Font(None, 36)
+font = pygame.font.Font(None, 22)
 textBasketBallCount = "Ball Count: "
 text_image_basketBall = font.render(textBasketBallCount, True, (255, 255, 255))
+ballCount = 0
 
 text_width, text_height = text_image_basketBall.get_size()
 text_x = SCREEN_WIDTH - text_width - 35
 text_y = 10
+
+#timer
+timerFont = pygame.font.Font(None, 22)
+timer = pygame.time.get_ticks()
 
 
 
@@ -88,16 +150,27 @@ bottom_boundary = SCREEN_HEIGHT - BORDER_SIZE
 
 
 clock = pygame.time.Clock()
+pygame.display.set_caption('Dodging Things')
 
 
 def main():
     pygame.init()
     robot = Player(50, 490)
+    pinkMonster = PinkMonster(700, 100, "left", "left")
+    
+    pinkMonsterRight = PinkMonster(25, 150, "right", "right")
     group = pygame.sprite.Group()
+    movingSprites = pygame.sprite.Group()
+  
+ 
     group.add(robot)
+    movingSprites.add(pinkMonster)
+    movingSprites.add(pinkMonsterRight)
+    
     
     balls = pygame.sprite.Group()
     soccerBalls = pygame.sprite.Group()
+    
     
     screen = pygame.display.set_mode((RES))
     
@@ -108,18 +181,15 @@ def main():
                 running = False
             if event.type == pygame.KEYDOWN: 
                 if event.key == pygame.K_SPACE:
-                        ball = Ball(robot.rect.x, robot.rect.y - 25) 
-                        balls.add(ball)
+                    ball = Ball(robot.rect.x, robot.rect.y - 25) 
+                    balls.add(ball)
                 if event.key == pygame.K_1:
-                        soccerBall = SoccerBall(robot.rect.x, robot.rect.y + 35, "horizontal")
-                        soccerBalls.add(soccerBall)
+                    soccerBall = SoccerBall(robot.rect.x, robot.rect.y + 35, "horizontal")
+                    soccerBalls.add(soccerBall)
                         
                 if event.key == pygame.K_2:
                     soccerBall = SoccerBall(robot.rect.x, robot.rect.y + 35, "leftHorizontal")
                     soccerBalls.add(soccerBall)
-                   
-                    
-                
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -143,13 +213,45 @@ def main():
         if robot.rect.y < 0:
             robot.rect.y = SCREEN_HEIGHT
             
-        screen.blit(background_image, (0, 0))
+        if pinkMonster.rect.x < -30:
+           pinkMonster.rect.x = -30
+           pinkMonster.direction = "right"
+           pinkMonster.flipped = "right"
+          
+          
+        if pinkMonster.rect.x > SCREEN_WIDTH:
+            pinkMonster.rect.x = SCREEN_WIDTH
+            pinkMonster.direction = "left"
+            pinkMonster.flipped = "left"
+            
+            
+        if pinkMonsterRight.rect.x < -30:
+           pinkMonsterRight.rect.x = -30
+           pinkMonsterRight.direction = "right"
+           pinkMonsterRight.flipped = "right"
+          
+          
+        if pinkMonsterRight.rect.x > SCREEN_WIDTH:
+            pinkMonsterRight.rect.x = SCREEN_WIDTH
+            pinkMonsterRight.direction = "left"
+            pinkMonsterRight.flipped = "left"
+          
+        timer = pygame.time.get_ticks()
+        timer_text = f"Time Survived: {str(timer // 1000)}"
+        timer_image = timerFont.render(timer_text, True, (255, 255, 255))
+        screen.blit(background_image, (0, 0)) #Image Goes First
+        
+        screen.blit(timer_image, (text_x - 675, text_y))
         screen.blit(text_image_basketBall, (text_x, text_y))
+        
         balls.update()
         balls.draw(screen)
         
         soccerBalls.update()
         soccerBalls.draw(screen)
+        
+        movingSprites.update()
+        movingSprites.draw(screen)
         
         group.draw(screen)
 
