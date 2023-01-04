@@ -3,6 +3,8 @@ import os
 import random
 
 pygame.font.init()
+pygame.init()
+
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -123,6 +125,12 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 BORDER_SIZE = 10
 
+#Background music
+pygame.mixer.pre_init(44100, 16, 2, 4096)
+pygame.mixer.music.load("BackgroundMusic.mp3")
+pygame.mixer.music.set_volume(0.5)
+pygame.mixer.music.play(-1) 
+
 #Background image
 background_image = pygame.image.load("bluemoon.png")
 
@@ -154,7 +162,6 @@ pygame.display.set_caption('Dodging Things')
 
 
 def main():
-    pygame.init()
     robot = Player(50, 490)
     pinkMonster = PinkMonster(700, 100, "left", "left")
     
