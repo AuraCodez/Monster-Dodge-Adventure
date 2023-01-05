@@ -18,7 +18,7 @@ Features
 - Press Space bar to shoot a basketball, 1 and 2 for shooting soccer balls.
 
 Optional Features
-
+- Add some basketball nets or soccer nets in the game that the user can score in for extra points to make the game more appealing (In progress)
 - Power-ups that give the player temporary invincibility or extra lives (In Progress)
 - Scorekeeping system that tracks the player's score and displays it on the screen (In Progress)
 - Multiple levels with increasing difficulty (In Progress)
