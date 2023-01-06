@@ -9,6 +9,7 @@ pygame.init()
 global score
 score = 0
 
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -17,7 +18,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.rise_speed = 5
-        self.hp = 100
+        self.hp = 10000
 
     def move_left(self):
         self.rect.x -= 5
@@ -30,17 +31,17 @@ class Player(pygame.sprite.Sprite):
 
     def downJump(self):
         self.rect.y += 5
-        
+
     def takeDamage(self, damage):
         self.hp -= damage
-        
+
     def update(self):
         if pygame.sprite.spritecollide(self, movingSprites, False):
-            self.takeDamage(2)            
-        
+            self.takeDamage(2)
+
         if self.hp <= 0:
             self.kill()
-        
+
 
 # The robot can also shoot out soccer balls if they want.
 class SoccerBall(pygame.sprite.Sprite):
@@ -62,7 +63,7 @@ class SoccerBall(pygame.sprite.Sprite):
             self.rect.x -= 5
 
 
-# The Robot will shoot out basketballs 
+# The Robot will shoot out basketballs
 class Ball(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -75,7 +76,6 @@ class Ball(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.y -= 7.5
-
 
 
 class PinkMonster(pygame.sprite.Sprite):
@@ -109,7 +109,7 @@ class PinkMonster(pygame.sprite.Sprite):
         self.direction = direction
         self.flipped = flipped
         self.hp = 100
-        
+
     def take_damage(self, damage):
         self.hp -= damage
 
@@ -135,35 +135,29 @@ class PinkMonster(pygame.sprite.Sprite):
         if self.direction == "right":
             self.image = self.flipped_image
             self.rect.x += 4
-            
-            
+
         if pygame.sprite.spritecollide(self, soccerBalls, True):
-            self.take_damage(10)
-            
+            self.take_damage(20)
+
         if pygame.sprite.spritecollide(self, balls, True):
-            self.take_damage(10)
-            
+            self.take_damage(20)
+
         if self.hp <= 0:
             score += 2
             self.kill()
-            
-            
-#A defined event that we will use for our monster spawning
+
+
+# A defined event that we will use for our monster spawning
 SPAWN_MONSTER_EVENT = 0
 
-#The monster spawning script
+# The monster spawning script
 def spawn_monster():
     x = random.randint(100, SCREEN_WIDTH)
     y = random.randint(100, SCREEN_HEIGHT)
-    randomDirection = ["left," "right"]
-    randomFlipped = ["left", "right"]
-    randomDirectionChoice = random.choice(randomDirection)
-    randomDirectionFlipped = random.choice(randomFlipped)
-    monster = PinkMonster(x, y, randomDirectionChoice, randomDirectionFlipped)
+    monster = PinkMonster(x, y, "left", "left")
+    monster_2 = PinkMonster(x, y, "right,", "right")
+    movingSprites.add(monster_2)
     movingSprites.add(monster)
-    
-    
-                     
 
 
 # Game resolution
@@ -208,7 +202,7 @@ balls = pygame.sprite.Group()
 soccerBalls = pygame.sprite.Group()
 
 
-#Spawning monster
+# Spawning monster
 pygame.time.set_timer(SPAWN_MONSTER_EVENT, 1000)
 
 
@@ -223,7 +217,7 @@ def main():
     robot = Player(50, 490)
     pinkMonster = PinkMonster(
         positionForMonsterX, positionForMonsterY, "left", "left")
-    
+
     pinkMonsterRight = PinkMonster(x, y, "right", "right")
 
     group.add(robot)
@@ -237,10 +231,10 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                
+
             if event.type == SPAWN_MONSTER_EVENT:
                 spawn_monster()
-                
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     ball = Ball(robot.rect.x, robot.rect.y - 25)
@@ -300,18 +294,17 @@ def main():
 
         textBasketBallCount = "Ball Count: {} ".format(score)
         text_image_basketBall = font.render(
-         textBasketBallCount, True, (255, 255, 255))
+            textBasketBallCount, True, (255, 255, 255))
         text_width, text_height = text_image_basketBall.get_size()
         text_x = SCREEN_WIDTH - text_width - 35
         text_y = 10
-        
-        #The amount of time that the user has survived in the game
+
+        # The amount of time that the user has survived in the game
 
         timer = pygame.time.get_ticks()
         timer_text = f"Time Survived: {str(timer // 1000)}"
         timer_image = timerFont.render(timer_text, True, (255, 255, 255))
-        
-        
+
         screen.blit(background_image, (0, 0))  # Image Goes First
         screen.blit(timer_image, (text_x - 675, text_y))
         screen.blit(text_image_basketBall, (text_x, text_y - text_height // 2))
@@ -324,7 +317,7 @@ def main():
 
         movingSprites.update()
         movingSprites.draw(screen)
-        
+
         group.update()
         group.draw(screen)
 
