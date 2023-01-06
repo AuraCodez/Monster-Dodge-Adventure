@@ -9,7 +9,6 @@ pygame.init()
 global score
 score = 0
 
-
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -18,6 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.rise_speed = 5
+        self.hp = 100
 
     def move_left(self):
         self.rect.x -= 5
@@ -30,13 +30,19 @@ class Player(pygame.sprite.Sprite):
 
     def downJump(self):
         self.rect.y += 5
-
+        
+    def takeDamage(self, damage):
+        self.hp -= damage
+        
     def update(self):
-        self.rect.y += self.rise_speed
+        if pygame.sprite.spritecollide(self, movingSprites, False):
+            self.takeDamage(2)            
+        
+        if self.hp <= 0:
+            self.kill()
+        
 
 # The robot can also shoot out soccer balls if they want.
-
-
 class SoccerBall(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
         super().__init__()
@@ -55,12 +61,8 @@ class SoccerBall(pygame.sprite.Sprite):
         if self.direction == "leftHorizontal":
             self.rect.x -= 5
 
-        if pygame.sprite.spritecollide(self, movingSprites, True):
-            self.kill()
-            score += 2
 
-
-# The Robot will shoot out basketballs
+# The Robot will shoot out basketballs 
 class Ball(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
@@ -72,11 +74,8 @@ class Ball(pygame.sprite.Sprite):
         self.speed = 5
 
     def update(self):
-        global score
         self.rect.y -= 7.5
-        if pygame.sprite.spritecollide(self, movingSprites, True):
-            self.kill()
-            score += 2
+
 
 
 class PinkMonster(pygame.sprite.Sprite):
@@ -109,8 +108,13 @@ class PinkMonster(pygame.sprite.Sprite):
         self.rect.y = y
         self.direction = direction
         self.flipped = flipped
+        self.hp = 100
+        
+    def take_damage(self, damage):
+        self.hp -= damage
 
     def update(self):
+        global score
         self.current_sprite += 0.5
         self.current_sprite_forRight += 0.5
 
@@ -131,6 +135,35 @@ class PinkMonster(pygame.sprite.Sprite):
         if self.direction == "right":
             self.image = self.flipped_image
             self.rect.x += 4
+            
+            
+        if pygame.sprite.spritecollide(self, soccerBalls, True):
+            self.take_damage(10)
+            
+        if pygame.sprite.spritecollide(self, balls, True):
+            self.take_damage(10)
+            
+        if self.hp <= 0:
+            score += 2
+            self.kill()
+            
+            
+#A defined event that we will use for our monster spawning
+SPAWN_MONSTER_EVENT = 0
+
+#The monster spawning script
+def spawn_monster():
+    x = random.randint(100, SCREEN_WIDTH)
+    y = random.randint(100, SCREEN_HEIGHT)
+    randomDirection = ["left," "right"]
+    randomFlipped = ["left", "right"]
+    randomDirectionChoice = random.choice(randomDirection)
+    randomDirectionFlipped = random.choice(randomFlipped)
+    monster = PinkMonster(x, y, randomDirectionChoice, randomDirectionFlipped)
+    movingSprites.add(monster)
+    
+    
+                     
 
 
 # Game resolution
@@ -175,17 +208,22 @@ balls = pygame.sprite.Group()
 soccerBalls = pygame.sprite.Group()
 
 
+#Spawning monster
+pygame.time.set_timer(SPAWN_MONSTER_EVENT, 1000)
+
+
 def main():
     global score
-    positionForMonsterX = random.randint(0, 800)
-    positionForMonsterY = random.randint(0, 600)
+    positionForMonsterX = random.randint(100, 700)
+    positionForMonsterY = random.randint(100, 600)
 
-    x = random.randint(0, 800)
-    y = random.randint(0, 600)
+    x = random.randint(100, 700)
+    y = random.randint(100, 600)
 
     robot = Player(50, 490)
     pinkMonster = PinkMonster(
         positionForMonsterX, positionForMonsterY, "left", "left")
+    
     pinkMonsterRight = PinkMonster(x, y, "right", "right")
 
     group.add(robot)
@@ -199,6 +237,10 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                
+            if event.type == SPAWN_MONSTER_EVENT:
+                spawn_monster()
+                
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     ball = Ball(robot.rect.x, robot.rect.y - 25)
@@ -282,7 +324,8 @@ def main():
 
         movingSprites.update()
         movingSprites.draw(screen)
-
+        
+        group.update()
         group.draw(screen)
 
         pygame.display.flip()
