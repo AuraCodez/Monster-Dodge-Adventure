@@ -1,6 +1,7 @@
 import pygame
 import os
 import random
+import pygame.font
 
 pygame.font.init()
 pygame.init()
@@ -13,12 +14,13 @@ score = 0
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.image.load('robot.png')
+        self.image = pygame.image.load("robot.png")
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.rise_speed = 5
-        self.hp = 10000
+        self.hp = 100
+        self.font = pygame.font.Font(None, 25)
 
     def move_left(self):
         self.rect.x -= 5
@@ -37,10 +39,14 @@ class Player(pygame.sprite.Sprite):
 
     def update(self):
         if pygame.sprite.spritecollide(self, movingSprites, False):
-            self.takeDamage(2)
+            self.takeDamage(0.2)
 
         if self.hp <= 0:
             self.kill()
+            
+    def draw_hp(self, surface):
+        text = self.font.render("HP: " + str(round(self.hp)), True, (255, 0, 0))
+        surface.blit(text, (600, 2))
 
 
 # The robot can also shoot out soccer balls if they want.
@@ -88,10 +94,12 @@ class PinkMonster(pygame.sprite.Sprite):
 
         # Loading the original animation
         for i in range(10):
-            image = pygame.image.load(os.path.join(
-                'animation', 'image{}.png'.format(i)))
+            image = pygame.image.load(
+                os.path.join("animation", "image{}.png".format(i))
+            )
             image = pygame.transform.scale(
-                image, (image.get_width() * 1.5, image.get_height() * 1.5))
+                image, (image.get_width() * 1.5, image.get_height() * 1.5)
+            )
             self.animation_list.append(image)
 
         # Want to make the monster walk Right, so use pygame.transfom.flip()
@@ -126,8 +134,9 @@ class PinkMonster(pygame.sprite.Sprite):
         if self.flipped == "right":
             if self.current_sprite_forRight >= len(self.right_animation_list):
                 self.current_sprite_forRight = 0
-            self.flipped_image = self.right_animation_list[int(
-                self.current_sprite_forRight)]
+            self.flipped_image = self.right_animation_list[
+                int(self.current_sprite_forRight)
+            ]
 
         if self.direction == "left":
             self.rect.x -= 4
@@ -145,19 +154,54 @@ class PinkMonster(pygame.sprite.Sprite):
         if self.hp <= 0:
             score += 2
             self.kill()
-
-
+            
+            
+        
+            
+            
+class SoccerNet(pygame.sprite.Sprite):
+    def __init__(self, x, y, direction):
+        super().__init__()
+        self.image = pygame.image.load("soccerGoal.png")
+        self.image = pygame.transform.scale(self.image, (75, 75))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.direction = direction
+        
+    
+    def update(self): 
+        global score
+        if self.direction == "top":
+            self.rect.y -= 5
+        
+        if self.direction == "bottom":
+            self.rect.y += 5
+            
+        if self.rect.y <= -30:
+            self.direction = "bottom"
+        if self.rect.y >= SCREEN_HEIGHT:
+            self.direction = "top"
+            
+            
+        if pygame.sprite.spritecollide(self, soccerBalls, True):
+            score += 2
+            
+ 
 # A defined event that we will use for our monster spawning
 SPAWN_MONSTER_EVENT = 0
 
 # The monster spawning script
+
+
 def spawn_monster():
-    x = random.randint(100, SCREEN_WIDTH)
-    y = random.randint(100, SCREEN_HEIGHT)
-    monster = PinkMonster(x, y, "left", "left")
-    monster_2 = PinkMonster(x, y, "right,", "right")
-    movingSprites.add(monster_2)
-    movingSprites.add(monster)
+    left_x = random.randint(SCREEN_WIDTH - 100, SCREEN_WIDTH)
+    right_x = random.randint(SCREEN_WIDTH - 100, SCREEN_WIDTH)
+    y = random.randint(100, SCREEN_HEIGHT - 100)
+    leftMonster = PinkMonster(left_x, y, "left", "left")
+    rightMonster = PinkMonster(right_x, y, "right,", "right")
+    movingSprites.add(leftMonster)
+
 
 
 # Game resolution
@@ -193,13 +237,15 @@ bottom_boundary = SCREEN_HEIGHT - BORDER_SIZE
 
 
 clock = pygame.time.Clock()
-pygame.display.set_caption('Dodging Things')
+pygame.display.set_caption("Dodging Things")
 
 # The sprite groups
 movingSprites = pygame.sprite.Group()
 group = pygame.sprite.Group()
 balls = pygame.sprite.Group()
 soccerBalls = pygame.sprite.Group()
+soccerNet = pygame.sprite.Group()
+
 
 
 # Spawning monster
@@ -215,14 +261,16 @@ def main():
     y = random.randint(100, 600)
 
     robot = Player(50, 490)
-    pinkMonster = PinkMonster(
-        positionForMonsterX, positionForMonsterY, "left", "left")
+    #pinkMonster = PinkMonster(positionForMonsterX, positionForMonsterY, "left", "left")
+    #pinkMonsterRight = PinkMonster(x, y, "right", "right")
+    
+    testNet = SoccerNet(25,50, "top")
 
-    pinkMonsterRight = PinkMonster(x, y, "right", "right")
 
     group.add(robot)
-    movingSprites.add(pinkMonster)
-    movingSprites.add(pinkMonsterRight)
+    soccerNet.add(testNet)
+    #movingSprites.add(pinkMonster)
+    #movingSprites.add(pinkMonsterRight)
 
     screen = pygame.display.set_mode((RES))
 
@@ -241,12 +289,14 @@ def main():
                     balls.add(ball)
                 if event.key == pygame.K_1:
                     soccerBall = SoccerBall(
-                        robot.rect.x, robot.rect.y + 35, "horizontal")
+                        robot.rect.x, robot.rect.y + 35, "horizontal"
+                    )
                     soccerBalls.add(soccerBall)
 
                 if event.key == pygame.K_2:
                     soccerBall = SoccerBall(
-                        robot.rect.x, robot.rect.y + 35, "leftHorizontal")
+                        robot.rect.x, robot.rect.y + 35, "leftHorizontal"
+                    )
                     soccerBalls.add(soccerBall)
 
         keys = pygame.key.get_pressed()
@@ -270,31 +320,9 @@ def main():
         if robot.rect.y < 0:
             robot.rect.y = SCREEN_HEIGHT
 
-        if pinkMonster.rect.x < -30:
-            pinkMonster.rect.x = -30
-            pinkMonster.direction = "right"
-            pinkMonster.flipped = "right"
-
-        if pinkMonster.rect.x > SCREEN_WIDTH:
-            pinkMonster.rect.x = SCREEN_WIDTH
-            pinkMonster.direction = "left"
-            pinkMonster.flipped = "left"
-
-        if pinkMonsterRight.rect.x < -30:
-            pinkMonsterRight.rect.x = -30
-            pinkMonsterRight.direction = "right"
-            pinkMonsterRight.flipped = "right"
-
-        if pinkMonsterRight.rect.x > SCREEN_WIDTH:
-            pinkMonsterRight.rect.x = SCREEN_WIDTH
-            pinkMonsterRight.direction = "left"
-            pinkMonsterRight.flipped = "left"
-
         # The score for the user
-
         textBasketBallCount = "Ball Count: {} ".format(score)
-        text_image_basketBall = font.render(
-            textBasketBallCount, True, (255, 255, 255))
+        text_image_basketBall = font.render(textBasketBallCount, True, (255, 255, 255))
         text_width, text_height = text_image_basketBall.get_size()
         text_x = SCREEN_WIDTH - text_width - 35
         text_y = 10
@@ -308,6 +336,11 @@ def main():
         screen.blit(background_image, (0, 0))  # Image Goes First
         screen.blit(timer_image, (text_x - 675, text_y))
         screen.blit(text_image_basketBall, (text_x, text_y - text_height // 2))
+    
+        robot.draw_hp(screen)
+        
+        soccerNet.update()
+        soccerNet.draw(screen)
 
         balls.update()
         balls.draw(screen)
