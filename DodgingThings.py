@@ -46,7 +46,7 @@ class Player(pygame.sprite.Sprite):
             
     def draw_hp(self, surface):
         text = self.font.render("HP: " + str(round(self.hp)), True, (255, 0, 0))
-        surface.blit(text, (600, 2))
+        surface.blit(text, (580, 2))
 
 
 # The robot can also shoot out soccer balls if they want.
@@ -321,7 +321,7 @@ def main():
             robot.rect.y = SCREEN_HEIGHT
 
         # The score for the user
-        textBasketBallCount = "Ball Count: {} ".format(score)
+        textBasketBallCount = "Score Count: {} ".format(score)
         text_image_basketBall = font.render(textBasketBallCount, True, (255, 255, 255))
         text_width, text_height = text_image_basketBall.get_size()
         text_x = SCREEN_WIDTH - text_width - 35
@@ -334,7 +334,7 @@ def main():
         timer_image = timerFont.render(timer_text, True, (255, 255, 255))
 
         screen.blit(background_image, (0, 0))  # Image Goes First
-        screen.blit(timer_image, (text_x - 675, text_y))
+        screen.blit(timer_image, (text_x - 640, text_y))
         screen.blit(text_image_basketBall, (text_x, text_y - text_height // 2))
     
         robot.draw_hp(screen)
